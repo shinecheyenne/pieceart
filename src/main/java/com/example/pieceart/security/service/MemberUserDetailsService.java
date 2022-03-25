@@ -40,7 +40,7 @@ public class MemberUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("MemberDetailsService loadUserByUsername "+ username);
-        Optional<Member> mem = memberRepository.findByEmail(username, false);
+        Optional<Member> mem = memberRepository.findByEmail(username);
         log.info(mem.get());
         if(!mem.isPresent()) throw new UsernameNotFoundException("사용자를 찾을 수 없습니다.");
 
@@ -80,7 +80,7 @@ public class MemberUserDetailsService implements UserDetailsService {
     }
 
     @Transactional
-    public String editMember(MemberDTO memberDTO, Authentication authentication, HttpServletResponse response) throws IOException {
+    public String editMember(MemberDTO memberDTO, Authentication authentication) throws IOException {
         String email = authentication.getPrincipal().toString();
         Optional<Member> mem = memberRepository.findByEmail(email, false);
         if(!mem.isPresent()) return null;

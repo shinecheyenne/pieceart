@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,8 +37,8 @@ public class MemberController {
     }
 
     @PutMapping("users/edit")
-    public ResponseEntity<Map<String, Object>> edit(@RequestBody MemberDTO member, Authentication authentication, HttpServletResponse response) throws IOException {
-        String result = service.editMember(member, authentication, response);
+    public ResponseEntity<Map<String, Object>> edit(@RequestBody MemberDTO member, Authentication authentication) throws IOException {
+        String result = service.editMember(member, authentication);
 
         Map<String, Object> map = new HashMap<>();
         map.put("token", result);
@@ -53,9 +54,10 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<Map<String, Object>> login(@RequestBody MemberDTO member){
-//        log.info("member_login: "+member);
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody MemberDTO member, HttpServletRequest request){
+        log.info("member_login: "+member.getEmail());
+        log.info("hahahahahahahahaha"+request.getAttribute("username"));
 //        String result = service.sendAuthToken(member);
 //        Map<String, Object> map = new HashMap<>();
 //
@@ -63,5 +65,6 @@ public class MemberController {
 //
 //        map.put("token", result);
 //        return ResponseEntity.ok().body(map);
-//    }
+        return null;
+    }
 }

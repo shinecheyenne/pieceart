@@ -39,7 +39,6 @@ public class ApiCheckFilter extends OncePerRequestFilter {
     }
 
     @Override
-//    @Transactional
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String email = null;
         ArrayList<String> roles = null;

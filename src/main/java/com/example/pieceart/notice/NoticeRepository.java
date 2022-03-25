@@ -19,5 +19,5 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
     @EntityGraph(attributePaths = "member", type=EntityGraph.EntityGraphType.LOAD)
     @Query("SELECT n from Notice n where n.member.email=:email")
-    List<Notice> getNoticesByWriter(String Email);
+    List<Notice> getNoticesByWriter(String email);
 }

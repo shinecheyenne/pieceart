@@ -1,5 +1,8 @@
 package com.example.pieceart.security.filter;
 
+import com.example.pieceart.entity.Member;
+import com.example.pieceart.entity.MemberRole;
+import com.example.pieceart.member.MemberRepository;
 import com.example.pieceart.security.util.JWTUtil;
 import com.nimbusds.jose.util.IOUtils;
 import com.nimbusds.jose.util.JSONObjectUtils;
@@ -11,6 +14,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
 import javax.servlet.FilterChain;
@@ -23,15 +27,20 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @Log4j2
 public class ApiLoginFilter extends AbstractAuthenticationProcessingFilter {
     private JWTUtil jwtUtil;
-    public ApiLoginFilter(String defaultFilterProcessesUrl, JWTUtil jwtUtil) {
+    private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
+    public ApiLoginFilter(String defaultFilterProcessesUrl, JWTUtil jwtUtil, MemberRepository memberRepository, PasswordEncoder passwordEncoder
+    ) {
         super(defaultFilterProcessesUrl);
         this.jwtUtil = jwtUtil;
+        this.memberRepository = memberRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -51,6 +60,23 @@ public class ApiLoginFilter extends AbstractAuthenticationProcessingFilter {
 
         String username = (String) map.get("email");
         String password = (String) map.get("password");
+        String client = (String) map.get("social");
+        log.info("client: "+client);
+
+        if (client.equals("google")) {
+            Optional<Member> member = memberRepository.findByEmail(username, true);
+
+            if(!member.isPresent()) {
+                Member NewMember = Member.builder()
+                        .email(username)
+                        .isGoogle(true)
+                        .name(username.split("@")[0])
+                        .password(passwordEncoder.encode(username+"pieceart"))
+                        .build();
+                NewMember.addMemberRole(MemberRole.USER);
+                memberRepository.save(NewMember);
+            }
+        }
 
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(username, password);
@@ -96,6 +122,5 @@ public class ApiLoginFilter extends AbstractAuthenticationProcessingFilter {
         PrintWriter out = response.getWriter();
         out.print(json);
 
-//        chain.doFilter(request, response);
     }
 }
